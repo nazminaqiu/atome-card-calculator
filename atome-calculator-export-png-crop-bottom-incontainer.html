@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Atome Instalment Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6C5CE7">
+<link rel="manifest" href="data:application/manifest+json,{
+  &quot;name&quot;:&quot;Atome Calculator&quot;,
+  &quot;short_name&quot;:&quot;AtomeCalc&quot;,
+  &quot;start_url&quot;:&quot;.&quot;,
+  &quot;display&quot;:&quot;standalone&quot;,
+  &quot;background_color&quot;:&quot;#ffffff&quot;,
+  &quot;theme_color&quot;:&quot;#6C5CE7&quot;
+}">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border-radius: 24px;
+    padding: 32px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  
+  body.dark {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  
+  body.dark .container {
+    background: #0f3460;
+    color: white;
+  }
+  
+  body.dark h1,
+  body.dark label,
+  body.dark .subtitle {
+    color: white;
+  }
+  
+  body.dark .subtitle {
+    opacity: 0.8;
+  }
+  
+  body.dark input {
+    background: #1a1a2e;
+    border-color: #533483;
+    color: white;
+  }
+  
+  body.dark .currency {
+    color: #ccc;
+  }
+  
+  body.dark .card {
+    background: #1a1a2e;
+    color: white;
+  }
+  
+  body.dark .card-header {
+    border-bottom-color: rgba(255,255,255,0.1);
+  }
+  
+  body.dark .card-title {
+    color: white;
+  }
+  
+  body.dark .row-label {
+    color: rgba(255,255,255,0.7);
+  }
+  
+  body.dark .row-value {
+    color: white;
+  }
+  
+  body.dark .total {
+    border-top-color: rgba(255,255,255,0.1);
+  }
+  
+  body.dark .total .row-value {
+    color: #a29bfe;
+  }
+  
+  body.green {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+  
+  body.green .container {
+    background: white;
+  }
+  
+  body.ocean {
+    background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%);
+  }
+  
+  body.sunset {
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  
+  .theme-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .theme-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .theme-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .theme-btn.active {
+    border-color: white;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.2);
+  }
+  
+  .theme-btn.purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .theme-btn.dark {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  
+  .theme-btn.green {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+  
+  .theme-btn.ocean {
+    background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%);
+  }
+  
+  .theme-btn.sunset {
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  }
+  
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .input-group {
+    margin-bottom: 24px;
+  }
+  
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .currency {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 600;
+    color: #666;
+    font-size: 18px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    font-size: 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: #6C5CE7;
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+  }
+  
+  .cards {
+    display: grid;
+    gap: 16px;
+  }
+  
+  .card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 16px;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .card.highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  }
+  
+  .card.highlight::before {
+    opacity: 1;
+  }
+  
+  .card.highlight * {
+    color: white !important;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+  }
+  
+  .card.highlight .card-header {
+    border-bottom-color: rgba(255,255,255,0.2);
+  }
+  
+  .card-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: #1a1a1a;
+  }
+  
+  .badge {
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 15px;
+  }
+  
+  .row-label {
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .card.highlight .row-label {
+    color: rgba(255,255,255,0.9);
+  }
+  
+  .row-value {
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  
+  .total {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid rgba(0,0,0,0.05);
+  }
+  
+  .card.highlight .total {
+    border-top-color: rgba(255,255,255,0.2);
+  }
+  
+  .total .row-value {
+    font-size: 20px;
+    color: #6C5CE7;
+  }
+  
+  .card.highlight .total .row-value {
+    color: white;
+  }
+  
+  @media (max-width: 480px) {
+    .container {
+      padding: 24px 20px;
+    }
+    
+    h1 {
+      font-size: 24px;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .card {
+    animation: fadeIn 0.4s ease;
+  }
+
+  /* Export buttons */
+  /* Single export button */
+  .export-single .export-btn {
+    width: 100%;
+    max-width: 260px;
+ flex: 1; }
+
+  .export-bar {
+    display: flex;
+    justify-content: center;
+    margin: 18px 0 10px;
+  }
+
+  .export-btn {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 0;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    background: #6C5CE7;
+    color: #fff;
+    transition: transform 0.08s ease, opacity 0.2s ease;
+    letter-spacing: 0.2px;
+  }
+
+  .export-btn.secondary {
+    background: #111827;
+  }
+
+  .export-btn:active {
+    transform: scale(0.99);
+  }
+
+  .export-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .export-note {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 18px;
+    min-height: 16px;
+  }
+
+  body.dark .export-note {
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* Hide controls while exporting so they don't appear in the image */
+  body.exporting .theme-selector,
+  body.exporting .export-bar,
+  body.exporting .export-note {
+    visibility: hidden;
+  }
+
+  /* Disable animations/transitions during export to avoid capturing mid-fade */
+  body.exporting *,
+  body.exporting *::before,
+  body.exporting *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  body.exporting .card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="theme-selector">
+    <button class="theme-btn purple active" data-theme="purple" title="Purple"></button>
+    <button class="theme-btn dark" data-theme="dark" title="Dark"></button>
+    <button class="theme-btn green" data-theme="green" title="Green"></button>
+    <button class="theme-btn ocean" data-theme="ocean" title="Ocean"></button>
+    <button class="theme-btn sunset" data-theme="sunset" title="Sunset"></button>
+  </div>
+<div class="header">
+    <h1>💳 Atome Calculator</h1>
+    <div class="subtitle">Compare instalment plans instantly</div>
+  </div>
+  
+  <div class="input-group">
+    <label for="billed">Purchase Amount</label>
+    <div class="input-wrapper">
+      <span class="currency">RM</span>
+      <input id="billed" type="number" step="0.01" value="986.21" placeholder="0.00">
+    </div>
+  </div>
+  
+  <div class="cards">
+    <div class="card" id="threeBox"></div>
+    <div class="card" id="sixBox"></div>
+  </div>
+
+
+  <div class="export-bar export-single">
+    <button class="export-btn" id="exportImg" type="button">Export PNG</button>
+  </div>
+  <div class="export-note" id="exportStatus" aria-live="polite"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+const PROFIT_RATE = 0.015; // 1.5% per month
+const SERVICE_FEE_RATE = 0.0108; // approximately 1.08% per month (31.95 / 986.21 / 3)
+
+
+function setExportStatus(msg){
+  const el = document.getElementById('exportStatus');
+  if(el) el.textContent = msg || '';
+}
+
+function setExportButtonsDisabled(disabled){
+  const btn = document.getElementById('exportImg');
+  if(btn) btn.disabled = !!disabled;
+}
+
+
+function cssColorToRgba(color){
+  // Uses browser parsing to normalize any CSS color into rgba components.
+  const tmp = document.createElement('div');
+  tmp.style.color = color;
+  document.body.appendChild(tmp);
+  const rgb = getComputedStyle(tmp).color; // "rgb(r,g,b)" or "rgba(r,g,b,a)"
+  tmp.remove();
+  const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/i);
+  if(!m) return {r:255,g:255,b:255,a:255};
+  return {r:+m[1], g:+m[2], b:+m[3], a: Math.round(((m[4] !== undefined ? +m[4] : 1)) * 255)};
+}
+
+function cropCanvasTop(canvas, bgColor){
+  // Crops only the top empty padding where all pixels match the background color.
+  const bg = cssColorToRgba(bgColor);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const w = canvas.width, h = canvas.height;
+
+  // Small tolerance because of anti-aliasing.
+  const tol = 8;
+  const img = ctx.getImageData(0, 0, w, h).data;
+
+  let top = 0;
+  outer:
+  for (let y = 0; y < h; y++){
+    const row = y * w * 4;
+    for (let x = 0; x < w; x++){
+      const i = row + x * 4;
+      const r = img[i], g = img[i+1], b = img[i+2], a = img[i+3];
+      if (Math.abs(r - bg.r) > tol || Math.abs(g - bg.g) > tol || Math.abs(b - bg.b) > tol || Math.abs(a - bg.a) > tol){
+        top = y;
+        break outer;
+      }
+    }
+  }
+
+  if (top <= 0 || top >= h-1) return canvas;
+
+  const cropped = document.createElement('canvas');
+  cropped.width = w;
+  cropped.height = h - top;
+  const cctx = cropped.getContext('2d');
+  cctx.drawImage(canvas, 0, top, w, h - top, 0, 0, w, h - top);
+  return cropped;
+}
+
+async function exportImage(kind){
+  // kind: "png" or "jpeg"
+  if(typeof html2canvas !== 'function'){
+    alert('Export requires html2canvas. Please open this file with an internet connection so the library can load.');
+    return;
+  }
+
+  const target = document.querySelector('.container');
+  if(!target) return;
+
+  try{
+    setExportButtonsDisabled(true);
+    setExportStatus('Preparing export…');
+    document.body.classList.add('exporting');
+
+    // Allow layout to settle (and controls to hide) before capture
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    // Let CSS overrides apply (and any in-flight animations settle)
+    await new Promise(r => setTimeout(r, 60));
+
+    const scale = Math.max(2, window.devicePixelRatio || 1);
+    const backgroundColor = (kind === 'jpeg') ? '#ffffff' : null;
+
+    const canvas = await html2canvas(target, {
+      backgroundColor,
+      scale,
+      useCORS: true
+    });
+
+    const billedVal = Number(document.getElementById('billed')?.value || 0);
+    const theme = document.body.className || 'purple';
+    const stamp = new Date().toISOString().slice(0,10);
+    const ext = (kind === 'jpeg') ? 'jpg' : 'png';
+    const filename = `atome-calc_${billedVal.toFixed(2)}_${theme}_${stamp}.${ext}`.replace(/\s+/g, '_');
+const mime = (kind === 'jpeg') ? 'image/jpeg' : 'image/png';
+    const dataUrl = canvas.toDataURL(mime);
+
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setExportStatus(`Downloaded: ${filename}`);
+  }catch(err){
+    console.error(err);
+    setExportStatus('Export failed. Check console for details.');
+    alert('Export failed. See console for details.');
+  }finally{
+    document.body.classList.remove('exporting');
+    setExportButtonsDisabled(false);
+  }
+}
+
+function round2(n){ return Math.round(n * 100) / 100; }
+
+function calc(billed, months){
+  const profitPerMonth = round2(billed * PROFIT_RATE);
+  const serviceFeePerMonth = round2(billed * SERVICE_FEE_RATE);
+  const totalFeePerMonth = profitPerMonth + serviceFeePerMonth;
+  
+  const totalProfit = round2(profitPerMonth * months);
+  const totalServiceFee = round2(serviceFeePerMonth * months);
+  const totalFees = round2(totalProfit + totalServiceFee);
+  
+  const monthly = round2(billed / months + totalFeePerMonth);
+  const last = round2(billed + totalFees - monthly * (months - 1));
+  const total = round2(billed + totalFees);
+  
+  return {
+    monthly, 
+    last, 
+    total, 
+    fees: totalFees,
+    profitPerMonth,
+    serviceFeePerMonth,
+    totalProfit,
+    totalServiceFee
+  };
+}
+
+// Load saved data
+function loadData(){
+  const saved = localStorage.getItem('atomeCalcData');
+  if(saved){
+    const data = JSON.parse(saved);
+    document.getElementById('billed').value = data.billed || 986.21;
+    setTheme(data.theme || 'purple');
+  }
+}
+
+// Save data
+function saveData(){
+  const data = {
+    billed: document.getElementById('billed').value,
+    theme: document.body.className || 'purple'
+  };
+  localStorage.setItem('atomeCalcData', JSON.stringify(data));
+}
+
+// Theme management
+function setTheme(theme){
+  document.body.className = theme === 'purple' ? '' : theme;
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+  saveData();
+}
+
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+});
+
+function render(){
+  const billed = Number(document.getElementById('billed').value);
+  if(!billed || billed <= 0) return;
+  
+  saveData(); // Auto-save on render
+  
+  const m3 = calc(billed, 3);
+  const m6 = calc(billed, 6);
+  const cheaper = m3.total < m6.total ? "3" : "6";
+  
+  document.getElementById('threeBox').className = "card" + (cheaper==="3" ? " highlight" : "");
+  document.getElementById('sixBox').className = "card" + (cheaper==="6" ? " highlight" : "");
+  
+  document.getElementById('threeBox').innerHTML = `
+    <div class="card-header">
+      <div class="card-title">3 Months Plan</div>
+      ${cheaper==="3" ? '<div class="badge">✓ Best Value</div>' : ''}
+    </div>
+    <div class="row">
+      <span class="row-label">Monthly payment (×3)</span>
+      <span class="row-value">RM${m3.monthly.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Profit (1.5% per month)</span>
+      <span class="row-value">RM${m3.profitPerMonth.toFixed(2)}/month</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Service fee (~1.08% per month)</span>
+      <span class="row-value">RM${m3.serviceFeePerMonth.toFixed(2)}/month</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Total profit (3 months)</span>
+      <span class="row-value">RM${m3.totalProfit.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Total service fee (3 months)</span>
+      <span class="row-value">RM${m3.totalServiceFee.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label"><strong>Total fees (3 months)</strong></span>
+      <span class="row-value"><strong>RM${m3.fees.toFixed(2)}</strong></span>
+    </div>
+    <div class="total">
+      <div class="row">
+        <span class="row-label">Total Amount</span>
+        <span class="row-value">RM${m3.total.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('sixBox').innerHTML = `
+    <div class="card-header">
+      <div class="card-title">6 Months Plan</div>
+      ${cheaper==="6" ? '<div class="badge">✓ Best Value</div>' : ''}
+    </div>
+    <div class="row">
+      <span class="row-label">Monthly payment (×6)</span>
+      <span class="row-value">RM${m6.monthly.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Profit (1.5% per month)</span>
+      <span class="row-value">RM${m6.profitPerMonth.toFixed(2)}/month</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Service fee (~1.08% per month)</span>
+      <span class="row-value">RM${m6.serviceFeePerMonth.toFixed(2)}/month</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Total profit (6 months)</span>
+      <span class="row-value">RM${m6.totalProfit.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label">Total service fee (6 months)</span>
+      <span class="row-value">RM${m6.totalServiceFee.toFixed(2)}</span>
+    </div>
+    <div class="row">
+      <span class="row-label"><strong>Total fees (6 months)</strong></span>
+      <span class="row-value"><strong>RM${m6.fees.toFixed(2)}</strong></span>
+    </div>
+    <div class="total">
+      <div class="row">
+        <span class="row-label">Total Amount</span>
+        <span class="row-value">RM${m6.total.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('exportImg');
+  if(btn){
+    btn.addEventListener('click', () => exportImage('png'));
+  }
+});
+
+document.getElementById('billed').addEventListener('input', render);
+
+// Initialize
+loadData();
+render();
+</script>
+
+
+  
+
+  
+</body>
+</html>
